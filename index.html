@@ -264,7 +264,8 @@ section{background:var(--paper)}
 .sbar li.past{opacity:.45}
 .sbar li.past .t::after{content:" (done)";font-size:12px;color:var(--muted)}
 /* ---- v2: finder ---- */
-.finder{margin-top:40px;display:grid;gap:22px}
+.dirtoggle{margin-top:36px;cursor:pointer;border:0;font:inherit;font-weight:600;width:auto;white-space:nowrap}.dirtoggle .arr{display:inline-block;margin-left:8px;transition:transform .3s}.dirtoggle[aria-expanded="true"] .arr{transform:rotate(180deg)}.dirwrap[hidden]{display:none}
+.finder{margin-top:34px;display:grid;gap:22px}
 @media(min-width:900px){.finder{grid-template-columns:1fr 300px;align-items:start}}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);background:var(--off);padding:9px 14px;font:600 11px/1 Lora,serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;transition:background .25s,color .25s,border-color .25s,transform .25s}
@@ -443,12 +444,15 @@ section{background:var(--paper)}
   <h2 data-split>Find your way around.</h2>
   <p class="lede">Seventy-one spaces on one level. Pick what you are after, or type a name, and the building sorts itself.</p>
 
+  <button class="btn dark dirtoggle" id="dirtoggle" type="button" aria-expanded="false" aria-controls="dirwrap">Browse all merchants <span class="arr" aria-hidden="true">&#9662;</span></button>
+  <div class="dirwrap" id="dirwrap" hidden>
   <div class="finder">
     <div class="chips" id="chips"></div>
     <label class="search"><span class="lab">Search</span><input id="msearch" type="search" placeholder="A shop name, a category, or a map number" autocomplete="off"></label>
   </div>
   <div class="mgrid" id="mgrid"></div>
   <p class="mcount" id="mcount"></p>
+  </div>
 
   <div class="cats" hidden>
     <div class="cat"><h3>Also in the building</h3><ul><li data-n="1">Cocoa & Crave</li><li data-n="44">The Blooming Collector</li><li data-n="9">Emporium Merchandise</li></ul></div>
@@ -939,7 +943,10 @@ section{background:var(--paper)}
       : '<div class="none">Nothing by that name. Ask at the coffee bar, they know everyone.</div>';
     count.textContent = list.length + " of " + order.length + " merchants" + (active!=="All" ? " in " + active : "") + (term ? ' matching "' + q.value.trim() + '"' : "");
   }
-  document.querySelectorAll("[data-find]").forEach(function(a){ a.addEventListener("click", function(){ q.value = a.dataset.find; active = "All"; render(); }); });
+  var dw = document.getElementById("dirwrap"), dt = document.getElementById("dirtoggle");
+  function dirOpen(v){ if(!dw||!dt) return; dw.hidden = !v; dt.setAttribute("aria-expanded", v ? "true" : "false"); dt.firstChild.nodeValue = v ? "Hide the list " : "Browse all merchants "; }
+  if(dt){ dt.addEventListener("click", function(){ dirOpen(dw.hidden); if(!dw.hidden) dt.scrollIntoView({behavior:"smooth", block:"start"}); }); }
+  document.querySelectorAll("[data-find]").forEach(function(a){ a.addEventListener("click", function(){ dirOpen(true); q.value = a.dataset.find; active = "All"; render(); }); });
   if(chips && grid){ render(); q.addEventListener("input", render);
     grid.addEventListener("pointermove", function(e){ var t = e.target.closest(".mt"); if(!t) return; var r = t.getBoundingClientRect(); t.style.setProperty("--x", (e.clientX-r.left)+"px"); t.style.setProperty("--y", (e.clientY-r.top)+"px"); }, {passive:true}); }
 
